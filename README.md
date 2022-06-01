@@ -8,6 +8,13 @@
 cd client
 npm install
 ```
+3. Install packages for server.
+```bash
+cd server
+virtualenv venv
+source venv/bin/activate
+pip -r requirements.txt
+```
 
 ## Usage
 1. Start the server in a terminal window
