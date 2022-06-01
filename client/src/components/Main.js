@@ -3,9 +3,14 @@ import Navbar from 'react-bootstrap/Navbar';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import Table from 'react-bootstrap/Table';
 
 export default function Main() {
     const [newItem, setNewItem] = React.useState({ cars: "", threshold: "" });
+    const [list, setList] = React.useState([]);
+    const [listLen, setListLen] = React.useState(0);
+    const [serverResponse, setServerResponse] = React.useState(false);
+
     document.title = "CO2 Emissions Predictor";
     
     async function getResults() {
@@ -17,8 +22,11 @@ export default function Main() {
                 body: JSON.stringify(newItem),
             });
             if (res.ok){
-                const x = await res.json();
-                console.log(x);
+                const res_parsed = await res.json();
+                const cars = res_parsed['cars'];
+                setListLen(cars.length);
+                setList(cars);
+                setServerResponse(true);
             }
         } catch (err) {
             console.error(err);
@@ -34,20 +42,17 @@ export default function Main() {
             </Navbar>
             <Container>
                 <Form>
-                    <Form.Group className="mb-3" controlId="formBasicEmail">
+                    <Form.Group className="mb-3" controlId="formBasicEmail" style={{marginTop: '3rem', textAlign: "-webkit-center"}}>
                         <Form.Label>Which cars are you interested in?</Form.Label>
-                        <Form.Control type="number" placeholder="Select 1, 2, 3, 4, or 5" onInput={e => setNewItem(prevState => ({
+                        <Form.Control type="number" placeholder="Select 1, 2, 3, 4, or 5" style={{textAlignLast: "center", maxWidth: "30rem"}} onInput={e => setNewItem(prevState => ({
                             ...prevState,
                             cars: e.target.value
                         }))}/>
-                        {/* <Form.Text className="text-muted">
-                        We'll never share your email with anyone else.
-                        </Form.Text> */}
                     </Form.Group>
 
-                    <Form.Group className="mb-3" controlId="formBasicPassword">
-                        <Form.Label>Enter your CO2 threshold for your car</Form.Label>
-                        <Form.Control type="number" placeholder="Any number between x to x" onInput={e => setNewItem(prevState => ({
+                    <Form.Group className="mb-3" controlId="formBasicPassword" style={{textAlign: "-webkit-center"}}>
+                        <Form.Label>Enter CO2 threshold for your car</Form.Label>
+                        <Form.Control type="number" placeholder="Any number between 96 to 522" style={{textAlignLast: "center", maxWidth: "30rem"}} onInput={e => setNewItem(prevState => ({
                             ...prevState,
                             threshold: e.target.value
                         }))}/>
@@ -57,8 +62,43 @@ export default function Main() {
                     </Button>
                 </Form>
             </Container>
-            <Container>
-                <h4>Server Response:</h4>
+            <Container style={{marginTop: '6rem'}}>
+                {serverResponse ?
+                    <>
+                        {listLen > 0 ?
+                            <>
+                                <h4>We found {listLen} car(s) that match your description!</h4>
+                                <Table striped bordered hover>
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Make</th>
+                                            <th>Model</th>
+                                            <th>CO2 Emissions (g/km)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {list.map((val, index) => {
+                                            return (<tr>
+                                                        <td>{index + 1}</td>
+                                                        <td>{val[0]}</td>
+                                                        <td>{val[1]}</td>
+                                                        <td>{val[2]}</td>
+                                                    </tr>);
+                                        })}
+                                    </tbody>
+                                </Table>
+                            </>
+                            :
+                            <>
+                                <h4>Sorry, but nothing matched your criteria. Please try again with some different values.</h4>
+                            </>
+                        }
+                    </>
+                    :
+                    <></>
+                }
+                
             </Container>
         </div>
     );
