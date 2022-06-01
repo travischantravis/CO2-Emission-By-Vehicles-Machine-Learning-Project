@@ -13,7 +13,7 @@ npm install
 cd server
 virtualenv venv
 source venv/bin/activate
-pip -r requirements.txt
+pip install -r requirements.txt
 ```
 
 ## Usage
